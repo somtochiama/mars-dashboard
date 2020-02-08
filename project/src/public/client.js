@@ -2,6 +2,8 @@ let store = {
     user: { name: "Student" },
     apod: '',
     rovers: ['Curiosity', 'Opportunity', 'Spirit'],
+    selectedRover: '',
+    roverInfo: []
 }
 
 // add our markup to the page
@@ -103,3 +105,5 @@ const getImageOfTheDay = (state) => {
 
     return data
 }
+
+const selectComponent
