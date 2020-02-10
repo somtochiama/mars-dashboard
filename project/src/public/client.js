@@ -25,7 +25,7 @@ const selectRover = (event, name) => {
 
 // create content
 const App = state => {
-	let { rovers, selectedRover } = state;
+	const { rovers, selectedRover } = state;
 	return `
 				<header>
 				</header>
@@ -171,7 +171,7 @@ const getRoverInfo = store => {
 
 // Example API call
 const getImageOfTheDay = state => {
-	let { apod } = state;
+	const { apod } = state;
 
 	fetch(`http://localhost:3000/apod`)
 		.then(res => res.json())
@@ -184,7 +184,7 @@ const getImageOfTheDay = state => {
 };
 
 const getRoverData = async state => {
-	let { selectedRover } = state;
+	const { selectedRover } = state;
 	await fetch(`http://localhost:3000/rover?rover=${selectedRover}`)
 		.then(res => res.json())
 		.then(({ data }) => {
