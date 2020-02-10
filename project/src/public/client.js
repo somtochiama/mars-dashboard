@@ -20,7 +20,6 @@ const render = async (root, state) => {
 };
 
 const selectRover = (event, name) => {
-	updateStore('loading', true);
 	updateStore('selectedRover', name);
 };
 
@@ -68,7 +67,6 @@ const Tabs = (tabLinks, selected) => {
 	const tabLinkHtml = tabLinks
 		.map(link => {
 			if (link == selected) {
-				console.log(selected);
 				return `<button class="tabLink active" onclick="selectRover(event, '${link}')" >${link}</button>`;
 			}
 			return `<button class="tabLink" onclick="selectRover(event, '${link}')" >${link}</button>`;
@@ -87,12 +85,10 @@ const imageHtml = image => `
 const DashboardUI = (listComponent, data) => {
 	const roverData = getRoverInfo(data);
 	const images = getRoverImages(data);
-	console.log(roverData, images);
 	if ((!roverData || roverData.name !== data.selectedRover) && !data.loading) {
-		console.log('here', roverData, data.selectedRover);
 		getRoverData(data);
 	}
-	if (images.length || !data.loading) {
+	if (images.length) {
 		return `
     <section class="rover-info">
 			<h2>Details for ${roverData.name} rover camera</h2>
@@ -192,7 +188,6 @@ const getRoverData = async state => {
 	await fetch(`http://localhost:3000/rover?rover=${selectedRover}`)
 		.then(res => res.json())
 		.then(({ data }) => {
-			console.log('here1', data);
 			updateStore('roverInfo', data.photos);
 		})
 		.catch(err => {
