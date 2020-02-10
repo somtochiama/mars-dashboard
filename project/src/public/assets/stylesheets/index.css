@@ -7,7 +7,7 @@ body {
 	min-height: 100vh;
 	color: white;
 	background-image: url('../images/bg-1.jpg');
-	background-color: rgba(0, 0, 0, 0.6);
+	background-color: rgba(0, 0, 0, 1);
 	background-position: center;
 	background-repeat: repeat-y;
 	background-size: contain;
