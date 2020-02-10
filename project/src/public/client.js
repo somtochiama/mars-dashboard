@@ -2,8 +2,9 @@ let store = Immutable.fromJS({
 	user: { name: 'Student' },
 	apod: '',
 	rovers: ['Curiosity', 'Opportunity', 'Spirit'],
-	selectedRover: '',
+	selectedRover: 'Curiosity',
 	roverInfo: [],
+	loading: false,
 });
 
 // add our markup to the page
@@ -11,48 +12,115 @@ const root = document.getElementById('root');
 
 const updateStore = (key, value) => {
 	store = store.set(key, value);
-	render(root, store);
+	render(root, store.toJS());
 };
 
 const render = async (root, state) => {
 	root.innerHTML = App(state);
 };
 
-const selectRover = async (event, name) => {
-	console.log('running');
+const selectRover = (event, name) => {
+	updateStore('loading', true);
 	updateStore('selectedRover', name);
-	await getRoverData(store.toJS());
 };
 
 // create content
 const App = state => {
-	let { rovers, apod, roverInfo } = state.toJS();
-	// console.log(rovers);
-	//const apod = state.get('apod').toJS();
-	//const rover = state.get('rover');
+	let { rovers, selectedRover } = state;
 	return `
-        <header></header>
+				<header>
+				</header>
         <main>
-            ${Greeting(store.get('name'))}
-            <section>
-                ${Tabs(rovers)}
-                ${DashboardUI(List, store.toJS())}
-                </section>
-                </main>
-                <footer></footer>
-                `;
+					${Greeting(state.user.name)}
+					<section>
+						${Tabs(rovers, selectedRover)}
+						${DashboardUI(List, state)}
+					</section>
+        </main>
+        <footer></footer>
+  `;
 };
 
 // listening for load event because page should load before any JS is called
 window.addEventListener('load', () => {
-	render(root, store);
+	render(root, store.toJS());
 });
 
+// ------------------------------------------------------  COMPONENTS
+
+// Pure function that renders conditional information -- THIS IS JUST AN EXAMPLE, you can delete it.
+const Greeting = name => {
+	let html = `
+		<h1 class="title">Mars Dashboard</h1>
+		<p class="desc">Click on any of the rovers to view recent pictures.</p>
+	`;
+	if (name) {
+		return (
+			`<h1 class="welcome">Welcome, <span class="name">${name}</span></h1>` +
+			html
+		);
+	}
+	return html;
+};
+
+const Tabs = (tabLinks, selected) => {
+	//Check if tabLink is empty
+	const tabLinkHtml = tabLinks
+		.map(link => {
+			if (link == selected) {
+				console.log(selected);
+				return `<button class="tabLink active" onclick="selectRover(event, '${link}')" >${link}</button>`;
+			}
+			return `<button class="tabLink" onclick="selectRover(event, '${link}')" >${link}</button>`;
+		})
+		.join('');
+	return `
+        <div class="tabs">${tabLinkHtml}</div>
+    `;
+};
+
+const imageHtml = image => `
+	<img src=${image.src}>
+	<p class="date"><span class="bold">Date: </span>${image.date}</p>
+`;
+
+const DashboardUI = (listComponent, data) => {
+	const roverData = getRoverInfo(data);
+	const images = getRoverImages(data);
+	console.log(roverData, images);
+	if ((!roverData || roverData.name !== data.selectedRover) && !data.loading) {
+		console.log('here', roverData, data.selectedRover);
+		getRoverData(data);
+	}
+	if (images.length || !data.loading) {
+		return `
+    <section class="rover-info">
+			<h2>Details for ${roverData.name} rover camera</h2>
+			<section class="rover-details">
+				<p class="detail"><span class="detail-name">Launch Date:</span> ${
+					roverData.launch_date
+				}</p>
+				<p class="detail"><span class="detail-name">Landing Date:</span> ${
+					roverData.landing_date
+				}</p>
+				<p class="detail"><span class="detail-name">Status: </span> ${
+					roverData.status
+				}</p>
+			</section>
+			<div class="gallery">
+					${listComponent(imageHtml, images)}
+			</div>
+		</section>
+  `;
+	} else {
+		return '<p class="loading">Loading..</p>';
+	}
+};
+
 const List = (fn, data) => {
-	console.log(data);
 	const listHtml = data
 		.map(
-			item => `<li>${fn(item)}</li>
+			item => `<li class="image-list">${fn(item)}</li>
     `,
 		)
 		.join('');
@@ -62,66 +130,6 @@ const List = (fn, data) => {
     `;
 };
 
-const imageHtml = image => `
-    <div>
-        <img src=${image.src}>
-        <p>${image.date}</p>
-    </div>
-`;
-
-const DashboardUI = (listComponent, data) => {
-	const roverData = getRoverInfo(data);
-	const images = getRoverImages(data);
-	console.log(images, roverData);
-	if (images.length) {
-		return `
-    <section>
-    <h1>${roverData.name}</h2>
-            <p>Launch Date: ${roverData.launch_date}   Landing Date:${
-			roverData.landing_date
-		}</p>
-        <p>${roverData.status}</p>
-            ${listComponent(item => {
-							console.log(item.name);
-							return `<p>${item.name}<p>`;
-						}, roverData.cameras)}
-                        </section>
-                        <div>
-                            ${listComponent(imageHtml, images)}
-                        </div>
-                        `;
-	}
-};
-
-// ------------------------------------------------------  COMPONENTS
-
-// Pure function that renders conditional information -- THIS IS JUST AN EXAMPLE, you can delete it.
-const Greeting = name => {
-	if (name) {
-		return `
-            <h1>Welcome, ${name}!</h1>
-        `;
-	}
-
-	return `
-        <h1>Hello!</h1>
-    `;
-};
-
-const Tabs = tabLinks => {
-	//Check if tabLink is empty
-	const tabLinkHtml = tabLinks
-		.map(
-			link =>
-				`
-            <button class="tabLink" onclick="selectRover(event, '${link}')" >${link}</button>
-        `,
-		)
-		.join('');
-	return `
-        <div class="tabs">${tabLinkHtml}</div>
-    `;
-};
 // Example of a pure function that renders infomation requested from the backend
 const ImageOfTheDay = apod => {
 	/// If image does not already exist, or it is not from today -- request it again
@@ -129,7 +137,6 @@ const ImageOfTheDay = apod => {
 	const photodate = new Date(apod.date);
 	console.log(photodate.getDate(), today.getDate());
 
-	console.log(photodate.getDate() === today.getDate());
 	if (!apod || apod.date === today.getDate()) {
 		getImageOfTheDay(store);
 	}
@@ -148,6 +155,20 @@ const ImageOfTheDay = apod => {
             <p>${apod.image.explanation}</p>
         `;
 	}
+};
+
+const getRoverImages = state => {
+	return state.roverInfo.map(imageData => ({
+		src: imageData.img_src,
+		date: imageData.earth_date,
+	}));
+};
+
+const getRoverInfo = store => {
+	const roverObj = store.roverInfo.find(
+		imageData => imageData.rover.name === store.selectedRover,
+	);
+	return roverObj && roverObj.rover;
 };
 
 // ------------------------------------------------------  API CALLS
@@ -171,7 +192,7 @@ const getRoverData = async state => {
 	await fetch(`http://localhost:3000/rover?rover=${selectedRover}`)
 		.then(res => res.json())
 		.then(({ data }) => {
-			console.log('here', data);
+			console.log('here1', data);
 			updateStore('roverInfo', data.photos);
 		})
 		.catch(err => {
@@ -179,18 +200,4 @@ const getRoverData = async state => {
 		});
 
 	return;
-};
-
-const getRoverImages = state => {
-	return state.roverInfo.map(imageData => ({
-		src: imageData.img_src,
-		date: imageData.earth_date,
-	}));
-};
-
-const getRoverInfo = store => {
-	const roverObj = store.roverInfo.find(
-		imageData => imageData.rover.name === store.selectedRover,
-	);
-	return roverObj && roverObj.rover;
 };

@@ -1,23 +1,48 @@
+:root {
+	--orange: #ffa500cf;
+}
+
 html {
-  box-sizing: border-box;
-  font-size: 16px;
+	box-sizing: border-box;
+	font-size: 62.5%;
 }
 
-*, *:before, *:after {
-  box-sizing: border-box;
+*,
+*:before,
+*:after {
+	box-sizing: border-box;
 }
 
-body, h1, h2, h3, h4, h5, h6, p, ol, ul, li {
-  margin: 0;
-  padding: 0;
-  font-weight: normal;
+body,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+p,
+ol,
+ul,
+li {
+	margin: 0;
+	padding: 0;
+	font-weight: normal;
 }
 
-ol, ul {
-  list-style: none;
+ol,
+ul {
+	list-style: none;
 }
 
 img {
-  max-width: 100%;
-  height: auto;
+	max-width: 100%;
+	height: auto;
+}
+
+h1 {
+	font-size: 3.2rem;
+}
+
+p {
+	font-size: 1.4rem;
 }

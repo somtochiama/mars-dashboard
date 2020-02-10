@@ -21,7 +21,7 @@ const apodController = async (req, res) => {
 const roverController = async (req, res, next) => {
 	const rover = req.query.rover;
 	console.log(rover);
-	const roverUrl = `https://api.nasa.gov/mars-photos/api/v1/rovers/${rover}/photos?sol=1000&api_key=${process.env.API_KEY}`;
+	const roverUrl = `https://api.nasa.gov/mars-photos/api/v1/rovers/${rover}/photos?sol=900&api_key=${process.env.API_KEY}`;
 	try {
 		let data = await fetchData(roverUrl);
 		return res.status(200).json({ data });
